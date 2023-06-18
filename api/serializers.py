@@ -1,14 +1,14 @@
 from rest_framework import serializers
-from .models import Transactions,ClientMaster,AgentMaster,Voucher
+from .models import Transactions,Attendant,ClientMaster,Voucher
 
 class TransactionSerializer(serializers.ModelSerializer):
    class Meta:
       model = Transactions
       fields = '__all__'
 
-class ClientSerializer(serializers.ModelSerializer):
+class AttendantSerializer(serializers.ModelSerializer):
    class Meta:
-      model=  ClientMaster
+      model=  Attendant
       fields = '__all__'
 
 class VoucherSerializer(serializers.ModelSerializer):
@@ -17,7 +17,7 @@ class VoucherSerializer(serializers.ModelSerializer):
       fields = '__all__'
 
 
-class AgentSerializer(serializers.ModelSerializer):
+class ClientSerializer(serializers.ModelSerializer):
    class Meta:
-      model = AgentMaster
+      model = ClientMaster
       fields = '__all__'
