@@ -5,6 +5,7 @@ from rest_framework.decorators import api_view,permission_classes
 from rest_framework.permissions import IsAuthenticated
 from .models import *
 from api.serializers import *
+from django.utils import timezone
 # Create your views here.
 
 
@@ -14,34 +15,103 @@ from api.serializers import *
 @permission_classes((IsAuthenticated, ))
 def createAttendant(request):
         """Authenticate and Create client """
-        client = Attendant.objects.create(request.data)
-        serializer = AttendantSerializer(client)
-        return Response(serializer.data)
+        try:
+            # attendant = Attendant.objects.create(
+            #                                 first_name      = request.data['first_name'],
+            #                                 last_name       = request.data['last_name'],
+            #                                 employee_id     = request.data['employee_id'],
+            #                                 location_id     = request.data['location_id'],
+            #                                 password        =  request.data['password'],
+            #                                 vouchers        = 0
+            #                                 )
+            serializer = AttendantSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            else:
+                 return Response(serializer.errors)
+        except Exception as e:
+             return Response({'status':str(e)})
 
 @api_view(['POST'])
 @permission_classes((IsAuthenticated, ))
 def createVoucher(request):
         """Authenticate user and create agent"""
-        Voucher = Voucher.objects.create(request.data)
-        serializer = VoucherSerializer(Voucher)
-        return Response(serializer.data)
+        try:
+            # voucher = Voucher.objects.create(   voucher_id=request.data['voucher_id'],
+            #                                     initial_amount=request.data['initial_amount'],
+            #                                     balance = request.data['balance'],
+            #                                     last_used =request.data['last_used'],
+            #                                     start_date=request.data['start_date'],
+            #                                     end_date=request.data['end_date'],
+            #                                     status=request.data['status'] ,
+            #                                     client_id_id=client)
+            serializer = VoucherSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                client = ClientMaster.objects.get(client_id=request.data['client_id'])
+                client.active_vouchers = client.active_vouchers+1
+                client.save(update_fields=['active_vouchers'])
+                return Response(serializer.data)
+            else:
+                 return Response(serializer.errors)
+        except Exception as e:
+              return Response({'status':str(e)})
 
 @api_view(['POST'])
 @permission_classes((IsAuthenticated, ))
 def createClient(request):
         """Authenticate user and create agent"""
-        client = ClientMaster.objects.create(request.data)
-        serializer = ClientSerializer(client)
-        return Response(serializer.data)
+        try:
+            # client = ClientMaster.objects.create(
+            #                                 client_name         = request.data['client_name'],
+            #                                 address             = request.data['address'],
+            #                                 contact_name        = request.data['contact_name'],
+            #                                 contact_no          = request.data['contact_no'],
+            #                                 active_vouchers     = request.data['active_vouchers'],
+            #                                 used_vouchers       = request.data['used_vouchers'],
+            #                                 last_order_date     = request.data['last_order_date'],
+            #                                 last_order_amount   = request.data['last_order_amount'],
+            # )
+            serializer = ClientSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            else:
+                 return Response(serializer.errors)
+        except Exception as e:
+              return Response({'status':str(e)})
 
 
 @api_view(['POST'])
 @permission_classes((IsAuthenticated, ))
 def createTransaction(request):
         """Authenticate user and create agent"""
-        transaction = Transactions.objects.create(request.data)
-        serializer = TransactionSerializer(transaction)
-        return Response(serializer.data)
+        try:
+            # attendant   = Attendant.objects.get(atdt_id     = request.data["atdt_id"])
+            # voucher     = Voucher.objects.get(voucher_id    = request.data['voucher_id'])
+            # try:
+            #     transaction = Transactions.objects.create( 
+            #                                                 initial_amount  = request.data['initial_amount'],
+            #                                                 redeem_amount   = request.data['redeem_amount'],
+            #                                                 left_balance    = request.data['left_balance'],
+            #                                                 Voucher_id_id   = voucher.voucher_id,
+            #                                                 id_id           = attendant.atdt_id
+            #                                                 )
+            # except Exception as e:
+            #      return Response({'status':str(e)})
+            serializer = TransactionSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                voucher     = Voucher.objects.get(voucher_id    = request.data['Voucher_id'])
+                voucher.last_transaction_id = serializer.data['txn_id']
+                voucher.last_used = timezone.now
+                voucher.save(update_fields=['last_transaction_id'])
+                return Response(serializer.data)
+            else:
+                return Response(serializer.errors)
+        except Exception as e:
+             return Response({'status':str(e)})
 """"""
 
 """All Retrieve API Functions"""

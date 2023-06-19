@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 def user_directory_path(instance, filename):
     # file will be uploaded to MEDIA_ROOT / user_<id>/<filename>
     return 'attendant_{0}/{1}'.format(instance.atdt_id, filename)
@@ -11,7 +12,10 @@ class Attendant(models.Model):
     location_id     = models.CharField(max_length=200,blank=False)
     password        = models.CharField(max_length=400,blank=False)
     vouchers        = models.IntegerField()
-    profile         = models.ImageField(upload_to=user_directory_path)
+    profile         = models.ImageField(upload_to=user_directory_path,null=True)
+
+    def __str__(self) -> str:
+        return str(self.atdt_id)
 
 class ClientMaster(models.Model):
     client_id           = models.AutoField(primary_key=True)
@@ -21,26 +25,35 @@ class ClientMaster(models.Model):
     contact_no          = models.CharField(max_length=400,blank=False,default='c_no')
     active_vouchers     = models.IntegerField(default=0)
     used_vouchers       = models.IntegerField(default=0)
-    last_order_date     = models.DateField()
+    last_order_date     = models.DateField(default=None)
     last_order_amount   = models.IntegerField()
 
+    def __str__(self) -> str:
+        return str(self.client_id)
+
 class Voucher(models.Model):
-    voucher_id      = models.AutoField(primary_key=True)
-    validity_date   = models.DateField(blank=False)
-    amount          = models.BigIntegerField(blank=False)
-    balance         = models.BigIntegerField()
-    last_used       = models.CharField(max_length=200)
-    start_date      = models.DateField()
-    end_date        = models.DateField()
-    client_id       = models.ForeignKey(ClientMaster,on_delete=models.CASCADE)
-    status          = models.CharField(max_length=1,default='A')
+    voucher_id          = models.CharField(primary_key=True,max_length=100)
+    initial_amount      = models.BigIntegerField(blank=False)
+    balance             = models.BigIntegerField(blank=False)
+    last_used           = models.DateTimeField(blank=True,null=True)
+    last_transaction_id = models.CharField(max_length=200,blank=True,null=True)
+    start_date          = models.DateField(blank=True)
+    end_date            = models.DateField(blank=True)
+    client_id           = models.ForeignKey(ClientMaster,on_delete=models.CASCADE)
+    status              = models.CharField(max_length=1,default='A')
+
+    def __str__(self) -> str:
+        return str(self.voucher_id)
 
 class Transactions(models.Model):
-    txn_date        = models.DateField(blank=False)
+    txn_date        = models.DateTimeField(blank=False,default=timezone.now)
     txn_id          = models.AutoField(primary_key=True) 
-    txn_amount      = models.BigIntegerField(blank=False)
     initial_amount  = models.BigIntegerField()
     redeem_amount   = models.BigIntegerField()
-    balance         = models.BigIntegerField()
-    agent_id        = models.ForeignKey(Attendant,on_delete=models.CASCADE)
-    voucher_id      = models.ForeignKey(Voucher,on_delete=models.CASCADE)
+    left_balance    = models.BigIntegerField()
+    Voucher_id      = models.ForeignKey(Voucher,on_delete=models.CASCADE)
+    id              = models.ForeignKey(Attendant,on_delete=models.CASCADE)
+
+    def __str__(self) -> str:
+        return str(self.txn_id)
+    
