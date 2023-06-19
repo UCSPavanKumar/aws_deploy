@@ -92,7 +92,7 @@ REST_FRAMEWORK = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'defaultdb',
+        'NAME': 'do_api',
         'USER': 'doadmin',
         'PASSWORD': 'AVNS_9JvZAbjvADwq9XpasbB',
         'HOST': 'skipper-do-user-3716620-0.b.db.ondigitalocean.com',
