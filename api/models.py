@@ -35,7 +35,7 @@ class Voucher(models.Model):
     voucher_id          = models.CharField(primary_key=True,max_length=100)
     initial_amount      = models.BigIntegerField(blank=False)
     balance             = models.BigIntegerField(blank=False)
-    last_used           = models.DateTimeField(blank=True,null=True)
+    last_used           = models.DateTimeField(blank=True,null=True,default=timezone.now())
     last_transaction_id = models.CharField(max_length=200,blank=True,null=True)
     start_date          = models.DateField(blank=True)
     end_date            = models.DateField(blank=True)
@@ -46,7 +46,7 @@ class Voucher(models.Model):
         return str(self.voucher_id)
 
 class Transactions(models.Model):
-    txn_date        = models.DateTimeField(blank=False,default=timezone.now)
+    txn_date        = models.DateTimeField(blank=False,default=timezone.now())
     txn_id          = models.AutoField(primary_key=True) 
     initial_amount  = models.BigIntegerField()
     redeem_amount   = models.BigIntegerField()

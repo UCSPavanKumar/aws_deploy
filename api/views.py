@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from .models import *
 from api.serializers import *
 from django.utils import timezone
+from datetime import datetime
 # Create your views here.
 
 
@@ -16,14 +17,6 @@ from django.utils import timezone
 def createAttendant(request):
         """Authenticate and Create client """
         try:
-            # attendant = Attendant.objects.create(
-            #                                 first_name      = request.data['first_name'],
-            #                                 last_name       = request.data['last_name'],
-            #                                 employee_id     = request.data['employee_id'],
-            #                                 location_id     = request.data['location_id'],
-            #                                 password        =  request.data['password'],
-            #                                 vouchers        = 0
-            #                                 )
             serializer = AttendantSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
@@ -38,14 +31,6 @@ def createAttendant(request):
 def createVoucher(request):
         """Authenticate user and create agent"""
         try:
-            # voucher = Voucher.objects.create(   voucher_id=request.data['voucher_id'],
-            #                                     initial_amount=request.data['initial_amount'],
-            #                                     balance = request.data['balance'],
-            #                                     last_used =request.data['last_used'],
-            #                                     start_date=request.data['start_date'],
-            #                                     end_date=request.data['end_date'],
-            #                                     status=request.data['status'] ,
-            #                                     client_id_id=client)
             serializer = VoucherSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
@@ -63,16 +48,6 @@ def createVoucher(request):
 def createClient(request):
         """Authenticate user and create agent"""
         try:
-            # client = ClientMaster.objects.create(
-            #                                 client_name         = request.data['client_name'],
-            #                                 address             = request.data['address'],
-            #                                 contact_name        = request.data['contact_name'],
-            #                                 contact_no          = request.data['contact_no'],
-            #                                 active_vouchers     = request.data['active_vouchers'],
-            #                                 used_vouchers       = request.data['used_vouchers'],
-            #                                 last_order_date     = request.data['last_order_date'],
-            #                                 last_order_amount   = request.data['last_order_amount'],
-            # )
             serializer = ClientSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
@@ -88,25 +63,17 @@ def createClient(request):
 def createTransaction(request):
         """Authenticate user and create agent"""
         try:
-            # attendant   = Attendant.objects.get(atdt_id     = request.data["atdt_id"])
-            # voucher     = Voucher.objects.get(voucher_id    = request.data['voucher_id'])
-            # try:
-            #     transaction = Transactions.objects.create( 
-            #                                                 initial_amount  = request.data['initial_amount'],
-            #                                                 redeem_amount   = request.data['redeem_amount'],
-            #                                                 left_balance    = request.data['left_balance'],
-            #                                                 Voucher_id_id   = voucher.voucher_id,
-            #                                                 id_id           = attendant.atdt_id
-            #                                                 )
-            # except Exception as e:
-            #      return Response({'status':str(e)})
+            voucher = Voucher.objects.get(voucher_id = request.data['Voucher_id'])
+            if voucher.balance == 0:
+                 return Response({'status':"Balance Exhausted"})
+            request.data['left_balance'] = request.data['initial_amount'] - request.data['redeem_amount']
             serializer = TransactionSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
-                voucher     = Voucher.objects.get(voucher_id    = request.data['Voucher_id'])
+                voucher.balance = voucher.balance - request.data['redeem_amount']
                 voucher.last_transaction_id = serializer.data['txn_id']
-                voucher.last_used = timezone.now
-                voucher.save(update_fields=['last_transaction_id'])
+                voucher.last_used = str(timezone.now())
+                voucher.save(update_fields=['last_transaction_id','balance','last_used'])
                 return Response(serializer.data)
             else:
                 return Response(serializer.errors)
@@ -145,7 +112,7 @@ def voucherListAll(request):
 def transactionsListAll(request):
         """Display all the clients from database"""
         transactions = Transactions.objects.all()
-        serializer = AttendantSerializer(transactions,many=True)
+        serializer = TransactionSerializer(transactions,many=True)
         return Response(serializer.data)
 """"""
 
@@ -201,7 +168,7 @@ def attendant_details(request,pk):
 @permission_classes((IsAuthenticated, ))
 def voucher_details(request,pk):
     try:
-        voucher = Voucher.objects.get(client_id=pk)
+        voucher = Voucher.objects.get(voucher_id=pk)
     except Exception as e:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -225,9 +192,9 @@ def voucher_details(request,pk):
 @permission_classes((IsAuthenticated, ))
 def transaction_details(request,pk):
     try:
-        transaction = Transactions.objects.get(transaction_id=pk)
+        transaction = Transactions.objects.get(txn_id=pk)
     except Exception as e:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response({'status':'Incorrect transaction ID'},status=status.HTTP_404_NOT_FOUND)
 
     if request.method=='GET':
         serializer = TransactionSerializer(transaction)
