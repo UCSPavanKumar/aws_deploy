@@ -2,6 +2,8 @@ from rest_framework import serializers
 from .models import Transactions,Attendant,ClientMaster,Voucher
 
 class TransactionSerializer(serializers.ModelSerializer):
+
+  
    class Meta:
       model = Transactions
       fields = '__all__'

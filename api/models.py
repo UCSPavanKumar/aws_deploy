@@ -48,11 +48,13 @@ class Voucher(models.Model):
 class Transactions(models.Model):
     txn_date        = models.DateTimeField(blank=False,default=timezone.now())
     txn_id          = models.AutoField(primary_key=True) 
-    initial_amount  = models.BigIntegerField()
-    redeem_amount   = models.BigIntegerField()
-    left_balance    = models.BigIntegerField()
+    initial_amount  = models.BigIntegerField(null=True)
+    redeem_amount   = models.BigIntegerField(null=True)
+    left_balance    = models.BigIntegerField(null=True)
     Voucher_id      = models.ForeignKey(Voucher,on_delete=models.CASCADE)
     id              = models.ForeignKey(Attendant,on_delete=models.CASCADE)
+
+  
 
     def __str__(self) -> str:
         return str(self.txn_id)

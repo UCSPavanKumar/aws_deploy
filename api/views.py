@@ -87,7 +87,7 @@ def createTransaction(request):
 def clientListAll(request):
         """Display all the clients from database"""
         clients = ClientMaster.objects.all()
-        serializer = AttendantSerializer(clients,many=True)
+        serializer = ClientSerializer(clients,many=True)
         return Response(serializer.data)
 
 
@@ -120,6 +120,7 @@ def transactionsListAll(request):
 @api_view(['GET','PUT','DELETE'])
 @permission_classes((IsAuthenticated, ))
 def client_details(request,pk):
+    """display all Client Details"""
     try:
         client = ClientMaster.objects.get(client_id=pk)
     except Exception as e:
@@ -130,7 +131,7 @@ def client_details(request,pk):
         return Response(serializer.data)
 
     elif request.method=='PUT':
-        serializer = ClientSerializer(client,data=request.data)
+        serializer = ClientSerializer(client,data=request.data,partial=True)
         if serializer.is_valid():
               serializer.save()
               return Response(serializer.data)
@@ -154,7 +155,7 @@ def attendant_details(request,pk):
         return Response(serializer.data)
 
     elif request.method=='PUT':
-        serializer = AttendantSerializer(atdt,data=request.data)
+        serializer = AttendantSerializer(atdt,data=request.data,partial=True)
         if serializer.is_valid():
               serializer.save()
               return Response(serializer.data)
@@ -177,7 +178,7 @@ def voucher_details(request,pk):
         return Response(serializer.data)
 
     elif request.method=='PUT':
-        serializer = VoucherSerializer(voucher,data=request.data)
+        serializer = VoucherSerializer(voucher,data=request.data,partial=True)
         if serializer.is_valid():
               serializer.save()
               return Response(serializer.data)
@@ -201,10 +202,10 @@ def transaction_details(request,pk):
         return Response(serializer.data)
 
     elif request.method=='PUT':
-        serializer = TransactionSerializer(transaction,data=request.data)
+        serializer = TransactionSerializer(transaction,data=request.data,partial=True)
         if serializer.is_valid():
               serializer.save()
-              return Response(serializer.data)
+              return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
     elif request.method=='DELETE':
