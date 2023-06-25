@@ -218,8 +218,9 @@ def transaction_details(request,pk):
 def employeeLogin(request):
      try:
         employee = Attendant.objects.get(employee_id=request.data['emp_id'],password=request.data['password'])
+        serializer = AttendantSerializer(employee)
         if employee:
-            return Response({'status':'Verified'})
+            return Response(serializer.data)
         else:
             return Response({'status':'Wrong Employee ID or password'})
      except Exception as e:
