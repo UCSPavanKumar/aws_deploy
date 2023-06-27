@@ -12,7 +12,7 @@ class Attendant(models.Model):
     location_id     = models.CharField(max_length=200,blank=False)
     password        = models.CharField(max_length=400,blank=False)
     vouchers        = models.IntegerField()
-    profile         = models.ImageField(upload_to=user_directory_path,null=True)
+    profile         = models.ImageField(upload_to=user_directory_path,null=True,blank=True)
 
     def __str__(self) -> str:
         return str(self.atdt_id)
