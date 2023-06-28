@@ -1,10 +1,12 @@
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.decorators import api_view,permission_classes
+from rest_framework.decorators import api_view,permission_classes,authentication_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.authentication import TokenAuthentication
 from .models import *
 from api.serializers import *
 from django.utils import timezone
@@ -15,15 +17,16 @@ class CustomAuthToken(ObtainAuthToken):
      def post(self,request,*args,**kwargs):
           serializer = self.serializer_class(data=request.data,context={'request':request})
           serializer.is_valid(raise_exception=True)
-          user = serializer.validated_data['user']
-          Token.objects.filter(user=user).delete()
-          token, created = Token.objects.create(user=user)
+          new_user = serializer.validated_data['username']
+          Token.objects.filter(user=new_user).delete()
+          token, created = Token.objects.create(user=new_user)
           return Response({'status': token.key})
 
 
 """All Create API Functions"""
 @api_view(['POST'])
 @permission_classes((IsAuthenticated, ))
+@authentication_classes([JWTAuthentication,TokenAuthentication])
 def createAttendant(request):
         """Authenticate and Create client """
         try:
@@ -38,23 +41,28 @@ def createAttendant(request):
 
 @api_view(['POST'])
 @permission_classes((IsAuthenticated, ))
+@authentication_classes([JWTAuthentication,TokenAuthentication])
 def createVoucher(request):
         """Authenticate user and create agent"""
+        print(request.data)
         try:
-            serializer = VoucherSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                client = ClientMaster.objects.get(client_id=request.data['client_id'])
-                client.active_vouchers = client.active_vouchers+1
-                client.save(update_fields=['active_vouchers'])
-                return Response(serializer.data)
-            else:
-                 return Response(serializer.errors)
+            for row in request.data:
+                print(row)
+                serializer = VoucherSerializer(data=row)
+                if serializer.is_valid():
+                    serializer.save()
+                    client = ClientMaster.objects.get(client_id=row['client_id'])
+                    client.active_vouchers = client.active_vouchers+1
+                    client.save(update_fields=['active_vouchers'])
+                    return Response(serializer.data)
+                else:
+                    return Response(serializer.errors)
         except Exception as e:
               return Response({'status':str(e)})
 
 @api_view(['POST'])
 @permission_classes((IsAuthenticated, ))
+@authentication_classes([JWTAuthentication,TokenAuthentication])
 def createClient(request):
         """Authenticate user and create agent"""
         try:
@@ -70,6 +78,7 @@ def createClient(request):
 
 @api_view(['POST'])
 @permission_classes((IsAuthenticated, ))
+@authentication_classes([JWTAuthentication,TokenAuthentication])
 def createTransaction(request):
         """Authenticate user and create agent"""
         try:
@@ -94,6 +103,7 @@ def createTransaction(request):
 """All Retrieve API Functions"""
 @api_view(['GET'])
 @permission_classes((IsAuthenticated, ))
+@authentication_classes([JWTAuthentication,TokenAuthentication])
 def clientListAll(request):
         """Display all the clients from database"""
         clients = ClientMaster.objects.all()
@@ -103,6 +113,7 @@ def clientListAll(request):
 
 @api_view(['GET'])
 @permission_classes((IsAuthenticated, ))
+@authentication_classes([JWTAuthentication,TokenAuthentication])
 def attendantListAll(request):
         """Display all the clients from database"""
         attendants = Attendant.objects.all()
@@ -111,6 +122,8 @@ def attendantListAll(request):
 
 @api_view(['GET'])
 @permission_classes((IsAuthenticated, ))
+
+@authentication_classes([JWTAuthentication,TokenAuthentication])
 def voucherListAll(request):
         """Display all the clients from database"""
         vouchers = Voucher.objects.all()
@@ -119,6 +132,7 @@ def voucherListAll(request):
 
 @api_view(['GET'])
 @permission_classes((IsAuthenticated, ))
+@authentication_classes([JWTAuthentication,TokenAuthentication])
 def transactionsListAll(request):
         """Display all the clients from database"""
         transactions = Transactions.objects.all()
@@ -129,6 +143,7 @@ def transactionsListAll(request):
 """GET by ID,Update By ID,Delete by ID"""
 @api_view(['GET','PUT','DELETE'])
 @permission_classes((IsAuthenticated, ))
+@authentication_classes([JWTAuthentication,TokenAuthentication])
 def client_details(request,pk):
     """display all Client Details"""
     try:
