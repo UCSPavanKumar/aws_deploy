@@ -178,7 +178,7 @@ def client_details(request,pk):
 @permission_classes((IsAuthenticated, ))
 def attendant_details(request,pk):
     try:
-        atdt = Attendant.objects.get(attendant_id=pk)
+        atdt = Attendant.objects.get(employee_id=pk)
     except Exception as e:
             return Response({'status':'Attendant ID not found'})
 
@@ -217,8 +217,12 @@ def voucher_details(request,pk):
         return Response({'status':serializer.errors})
     
     elif request.method=='DELETE':
-         voucher.delete()
-         return Response({'status':'Voucher Deleted'})
+        serializer = VoucherSerializer(voucher)
+        client = ClientMaster.objects.get(client_id=serializer.data['client_id'])
+        client.active_vouchers = client.active_vouchers-1
+        client.save(update_fields=['active_vouchers'])
+        voucher.delete()
+        return Response({'status':'Voucher Deleted'})
     
 
 @api_view(['GET','PUT','DELETE'])
