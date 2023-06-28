@@ -1,4 +1,5 @@
 from django.shortcuts import render
+import json
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes,authentication_classes
@@ -43,22 +44,25 @@ def createAttendant(request):
 @permission_classes((IsAuthenticated, ))
 @authentication_classes([JWTAuthentication,TokenAuthentication])
 def createVoucher(request):
+        result = []
         """Authenticate user and create agent"""
         print(request.data)
-        try:
-            for row in request.data:
-                print(row)
+        
+        for row in request.data['data']:
+            print(row)
+            try:
                 serializer = VoucherSerializer(data=row)
                 if serializer.is_valid():
                     serializer.save()
                     client = ClientMaster.objects.get(client_id=row['client_id'])
                     client.active_vouchers = client.active_vouchers+1
                     client.save(update_fields=['active_vouchers'])
-                    return Response(serializer.data)
+                    result.append({row['voucher_id']:"created"})
                 else:
-                    return Response(serializer.errors)
-        except Exception as e:
-              return Response({'status':str(e)})
+                     result.append({row['voucher_id']:serializer.errors})
+            except Exception as e:
+                result.append({row['voucher_id']:str(e)})
+        return Response(result)
 
 @api_view(['POST'])
 @permission_classes((IsAuthenticated, ))
