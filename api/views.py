@@ -100,7 +100,7 @@ def createTransaction(request):
                 voucher.last_transaction_id = serializer.data['txn_id']
                 voucher.last_used = str(timezone.now())
                 voucher.save(update_fields=['last_transaction_id','balance','last_used'])
-                return Response({'status':'Created Transaction'})
+                return Response({'status':'Created Transaction','data':serializer.data})
             else:
                 return Response(serializer.errors)
         except Exception as e:
