@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes,authentication_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.views import ObtainAuthToken
+from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.authentication import TokenAuthentication
@@ -32,11 +33,13 @@ def createAttendant(request):
         """Authenticate and Create client """
         try:
             serializer = AttendantSerializer(data=request.data)
+            new_user = User.objects.create_superuser(username=request.data['employee_id'],password=request.data['password'])
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data)
+                token,created = Token.objects.get_or_create(user=new_user)
+                return Response({'status':'Created Attendant'})
             else:
-                 return Response(serializer.errors)
+                 return Response({'status':serializer.errors})
         except Exception as e:
              return Response({'status':str(e)})
 
@@ -73,9 +76,9 @@ def createClient(request):
             serializer = ClientSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data)
+                return Response({'status':'Created Client'})
             else:
-                 return Response(serializer.errors)
+                 return Response({'status':serializer.errors})
         except Exception as e:
               return Response({'status':str(e)})
 
@@ -97,7 +100,7 @@ def createTransaction(request):
                 voucher.last_transaction_id = serializer.data['txn_id']
                 voucher.last_used = str(timezone.now())
                 voucher.save(update_fields=['last_transaction_id','balance','last_used'])
-                return Response(serializer.data)
+                return Response({'status':'Created Transaction'})
             else:
                 return Response(serializer.errors)
         except Exception as e:
@@ -163,8 +166,8 @@ def client_details(request,pk):
         serializer = ClientSerializer(client,data=request.data,partial=True)
         if serializer.is_valid():
               serializer.save()
-              return Response(serializer.data)
-        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+              return Response({'status':'Data Updated'})
+        return Response({'status':serializer.errors})
     
     elif request.method=='DELETE':
          client.delete()
@@ -187,8 +190,8 @@ def attendant_details(request,pk):
         serializer = AttendantSerializer(atdt,data=request.data,partial=True)
         if serializer.is_valid():
               serializer.save()
-              return Response(serializer.data)
-        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+              return Response({'status':'Data Updated'})
+        return Response({'status':serializer.errors})
     elif request.method=='DELETE':
          atdt.delete()
          return Response({'status':'Attendant Deleted'},status=status.HTTP_204_NO_CONTENT)
@@ -210,9 +213,8 @@ def voucher_details(request,pk):
         serializer = VoucherSerializer(voucher,data=request.data,partial=True)
         if serializer.is_valid():
               serializer.save()
-              return Response(serializer.data)
-        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-    
+              return Response({'status':'Data Updated'})
+        return Response({'status':serializer.errors})
     elif request.method=='DELETE':
          voucher.delete()
          return Response({'status':'Voucher Deleted'},status=status.HTTP_204_NO_CONTENT)
@@ -234,8 +236,8 @@ def transaction_details(request,pk):
         serializer = TransactionSerializer(transaction,data=request.data,partial=True)
         if serializer.is_valid():
               serializer.save()
-              return Response(serializer.data,status=status.HTTP_201_CREATED)
-        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+              return Response({'status':'Data Updated'})
+        return Response({'status':serializer.errors})
     
     elif request.method=='DELETE':
          transaction.delete()
@@ -243,17 +245,17 @@ def transaction_details(request,pk):
     
 """"""
 @api_view(['POST'])
-@permission_classes((IsAuthenticated, ))
 def employeeLogin(request):
-     try:
-        employee = Attendant.objects.get(employee_id=request.data['emp_id'],password=request.data['password'])
-        serializer = AttendantSerializer(employee)
-        if employee:
-            return Response(serializer.data)
+        
+        check = Attendant.objects.filter(employee_id=request.data['emp_id'],password=request.data['password'])
+        serializer = AttendantSerializer(check)
+        data = serializer.data
+        print(data)
+        if 'atdt_id' in data.keys():
+            return Response({'status':'Verified'})
         else:
             return Response({'status':'Wrong Employee ID or password'})
-     except Exception as e:
-          return Response({'status':'Wrong Employee ID or password'})
+    
 
      
      
