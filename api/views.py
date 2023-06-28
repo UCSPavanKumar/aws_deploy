@@ -156,7 +156,7 @@ def client_details(request,pk):
     try:
         client = ClientMaster.objects.get(client_id=pk)
     except Exception as e:
-            return Response({'status':'Client ID not found'},status=status.HTTP_404_NOT_FOUND)
+            return Response({'status':'Client ID not found'})
 
     if request.method=='GET':
         serializer = ClientSerializer(client)
@@ -171,7 +171,7 @@ def client_details(request,pk):
     
     elif request.method=='DELETE':
          client.delete()
-         return Response({'status':'Client Deleted'},status=status.HTTP_204_NO_CONTENT)
+         return Response({'status':'Client Deleted'})
 
 
 @api_view(['GET','PUT','DELETE'])
@@ -180,7 +180,7 @@ def attendant_details(request,pk):
     try:
         atdt = Attendant.objects.get(attendant_id=pk)
     except Exception as e:
-            return Response({'status':'Attendant ID not found'},status=status.HTTP_404_NOT_FOUND)
+            return Response({'status':'Attendant ID not found'})
 
     if request.method=='GET':
         serializer = AttendantSerializer(atdt)
@@ -194,7 +194,7 @@ def attendant_details(request,pk):
         return Response({'status':serializer.errors})
     elif request.method=='DELETE':
          atdt.delete()
-         return Response({'status':'Attendant Deleted'},status=status.HTTP_204_NO_CONTENT)
+         return Response({'status':'Attendant Deleted'})
 
 
 @api_view(['GET','PUT','DELETE'])
@@ -203,7 +203,7 @@ def voucher_details(request,pk):
     try:
         voucher = Voucher.objects.get(voucher_id=pk)
     except Exception as e:
-            return Response({'status':'Voucher ID not found'},status=status.HTTP_404_NOT_FOUND)
+            return Response({'status':'Voucher ID not found'})
 
     if request.method=='GET':
         serializer = VoucherSerializer(voucher)
@@ -215,9 +215,10 @@ def voucher_details(request,pk):
               serializer.save()
               return Response({'status':'Data Updated'})
         return Response({'status':serializer.errors})
+    
     elif request.method=='DELETE':
          voucher.delete()
-         return Response({'status':'Voucher Deleted'},status=status.HTTP_204_NO_CONTENT)
+         return Response({'status':'Voucher Deleted'})
     
 
 @api_view(['GET','PUT','DELETE'])
@@ -226,7 +227,7 @@ def transaction_details(request,pk):
     try:
         transaction = Transactions.objects.get(txn_id=pk)
     except Exception as e:
-            return Response({'status':' Transaction ID not found'},status=status.HTTP_404_NOT_FOUND)
+            return Response({'status':' Transaction ID not found'})
 
     if request.method=='GET':
         serializer = TransactionSerializer(transaction)
@@ -241,7 +242,7 @@ def transaction_details(request,pk):
     
     elif request.method=='DELETE':
          transaction.delete()
-         return Response({'status':'Transaction Deleted'},status=status.HTTP_204_NO_CONTENT)
+         return Response({'status':'Transaction Deleted'})
     
 """"""
 @api_view(['POST'])
