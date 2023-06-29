@@ -264,8 +264,8 @@ def transaction_details(request,pk):
 def ChatView(request):
      if request.method == 'GET':
           try:
-            chats       = chat.objects.get(employee_id=request.data['employee_id'])
-            serializer  = ChatSerializer(chats)
+            chats       = chat.objects.filter(employee_id=request.data['employee_id'])
+            serializer  = ChatSerializer(chats,many=True)
             return Response(serializer.data)
           except Exception as e:
                return Response({'status':str(e)})
