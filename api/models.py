@@ -71,3 +71,12 @@ class AccessLogModel(models.Model):
     referrer = models.CharField(max_length=512,null=True,blank=True)
     timestamp = models.DateTimeField(null=False,blank=True)
     user = models.CharField(max_length=100,null=True,blank=True)
+
+
+class chat(models.Model):
+    chat_id     = models.AutoField(primary_key=True)
+    message     = models.CharField(max_length=400,blank=False,null=False)
+    employee_id = models.CharField(max_length=200,blank=False)
+    status      = models.CharField(max_length=1,default='U')
+    created_at  = models.DateTimeField(default=timezone.now())
+    

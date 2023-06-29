@@ -3,7 +3,7 @@ import json
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes,authentication_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.authtoken.views import ObtainAuthToken
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
@@ -11,6 +11,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.authentication import TokenAuthentication
 from .models import *
 from api.serializers import *
+
 from django.utils import timezone
 from datetime import datetime
 # Create your views here.
@@ -182,6 +183,7 @@ def client_details(request,pk):
 
 @api_view(['GET','PUT','DELETE'])
 @permission_classes((IsAuthenticated, ))
+@authentication_classes([JWTAuthentication,TokenAuthentication])
 def attendant_details(request,pk):
     try:
         atdt = Attendant.objects.get(employee_id=pk)
@@ -205,6 +207,7 @@ def attendant_details(request,pk):
 
 @api_view(['GET','PUT','DELETE'])
 @permission_classes((IsAuthenticated, ))
+@authentication_classes([JWTAuthentication,TokenAuthentication])
 def voucher_details(request,pk):
     try:
         voucher = Voucher.objects.get(voucher_id=pk)
@@ -233,6 +236,7 @@ def voucher_details(request,pk):
 
 @api_view(['GET','PUT','DELETE'])
 @permission_classes((IsAuthenticated, ))
+@authentication_classes([JWTAuthentication,TokenAuthentication])
 def transaction_details(request,pk):
     try:
         transaction = Transactions.objects.get(txn_id=pk)
@@ -254,19 +258,30 @@ def transaction_details(request,pk):
          transaction.delete()
          return Response({'status':'Transaction Deleted'})
     
-""""""
-@api_view(['POST'])
-def employeeLogin(request):
-        
-        check = Attendant.objects.filter(employee_id=request.data['emp_id'],password=request.data['password'])
-        serializer = AttendantSerializer(check)
-        data = serializer.data
-        print(data)
-        if 'atdt_id' in data.keys():
-            return Response({'status':'Verified'})
-        else:
-            return Response({'status':'Wrong Employee ID or password'})
-    
-
-     
-     
+@api_view(['GET','PUT','POST'])
+@permission_classes([AllowAny])
+@authentication_classes([])
+def ChatView(request):
+     if request.method == 'GET':
+          try:
+            chats       = chat.objects.get(employee_id=request.data['employee_id'])
+            serializer  = ChatSerializer(chats)
+            return Response(serializer.data)
+          except Exception as e:
+               return Response({'status':str(e)})
+     elif request.method == 'PUT':
+          chats = chat.objects.get(chat_id=request.data['chat_id'])
+          serializer = ChatSerializer(chats,data=request.data,partial=True)
+          if serializer.is_valid():
+            serializer.save()
+            return Response({'status':'Chat Marked as Read'})
+          return Response({'status':serializer.errors})
+     elif request.method=='POST':
+          try:
+            serializer = ChatSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'status':'chat created'})
+            return Response({'status':serializer.errors})
+          except Exception as e:
+               return Response({'status':str(e)})

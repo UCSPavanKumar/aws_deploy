@@ -16,6 +16,5 @@ urlpatterns = [
     path('client/<str:pk>/',views.client_details,name='client_details'),
     path('attendant/<str:pk>/',views.attendant_details,name='attendant_details'),
     path('transaction/<str:pk>/',views.transaction_details,name='transaction_details'),
-    path('login/',views.employeeLogin,name='employeeLogin')
-
+    path('chat/',views.ChatView,name='ChatView')
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

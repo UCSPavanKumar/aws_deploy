@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Transactions,Attendant,ClientMaster,Voucher
+from .models import Transactions,Attendant,ClientMaster,Voucher,chat
 
 class TransactionSerializer(serializers.ModelSerializer):
 
@@ -22,4 +22,9 @@ class VoucherSerializer(serializers.ModelSerializer):
 class ClientSerializer(serializers.ModelSerializer):
    class Meta:
       model = ClientMaster
+      fields = '__all__'
+
+class ChatSerializer(serializers.ModelSerializer):
+   class Meta:
+      model = chat
       fields = '__all__'
