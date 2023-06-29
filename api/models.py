@@ -25,7 +25,7 @@ class ClientMaster(models.Model):
     contact_no          = models.CharField(max_length=400,blank=False,default='c_no')
     active_vouchers     = models.IntegerField(default=0)
     used_vouchers       = models.IntegerField(default=0)
-    last_order_date     = models.DateField(default=None)
+    last_order_date     = models.DateField(default=None,blank=True,null=True)
     last_order_amount   = models.IntegerField()
 
     def __str__(self) -> str:

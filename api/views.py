@@ -31,17 +31,20 @@ class CustomAuthToken(ObtainAuthToken):
 @authentication_classes([JWTAuthentication,TokenAuthentication])
 def createAttendant(request):
         """Authenticate and Create client """
-        try:
-            serializer = AttendantSerializer(data=request.data)
-            new_user = User.objects.create_superuser(username=request.data['employee_id'],password=request.data['password'])
-            if serializer.is_valid():
-                serializer.save()
-                token,created = Token.objects.get_or_create(user=new_user)
-                return Response({'status':'Created Attendant'})
-            else:
-                 return Response({'status':serializer.errors})
-        except Exception as e:
-             return Response({'status':str(e)})
+        result = []
+        for row in request.data['data']:
+            try:
+                serializer = AttendantSerializer(data=row)
+                new_user = User.objects.create_superuser(username=row['employee_id'],password=row['password'])
+                if serializer.is_valid():
+                    serializer.save()
+                    token,created = Token.objects.get_or_create(user=new_user)
+                    result.append({row['employee_id']:'Created Attendant'})
+                else:
+                   result.append({row['employee_id']:serializer.errors})
+            except Exception as e:
+                    result.append({row['employee_id']:str(e)})
+        return Response(result)
 
 @api_view(['POST'])
 @permission_classes((IsAuthenticated, ))
@@ -71,16 +74,19 @@ def createVoucher(request):
 @permission_classes((IsAuthenticated, ))
 @authentication_classes([JWTAuthentication,TokenAuthentication])
 def createClient(request):
+        result = []
         """Authenticate user and create agent"""
-        try:
-            serializer = ClientSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response({'status':'Created Client'})
-            else:
-                 return Response({'status':serializer.errors})
-        except Exception as e:
-              return Response({'status':str(e)})
+        for row in request.data['data']:
+            try:
+                serializer = ClientSerializer(data=row)
+                if serializer.is_valid():
+                    serializer.save()
+                    result.append({row['client_id']:'Created Client'})
+                else:
+                    result.append({row['client_id']:serializer.errors})
+            except Exception as e:
+                result.append({row['client_id']:str(e)})
+        return Response(result)
 
 
 @api_view(['POST'])
