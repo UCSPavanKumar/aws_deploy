@@ -26,7 +26,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY",get_random_secret_key())
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG","False") == "True"
 
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS","127.0.0.1,localhost").split(',')
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS","127.0.0.1,localhost,223.178.82.175").split(',')
 
 DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", "False") == "True"
 
@@ -107,7 +107,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'do_api',
         'USER': 'doadmin',
-        'PASSWORD': 'AVNS_9JvZAbjvADwq9XpasbB',
+        'PASSWORD': 'AVNS_CuOl_2iBg8XYk2BSrcT',
         'HOST': 'skipper-do-user-3716620-0.b.db.ondigitalocean.com',
         'PORT': '25060',
     }
